@@ -35,7 +35,7 @@ kubectl apply -f kubernetes/06-frontend/
 
 The API and Redis manifests each contain both a Deployment and a Service. The later exercises explain these objects separately; edit the corresponding document within the existing manifest instead of replacing the whole file with a partial example.
 
-The numbers indicate apply order, not readiness: workloads may still be starting after each command completes. PostgreSQL needs suitable persistent storage and database initialization; the frontend needs its `API_URL` configured before the complete application can work.
+The numbers indicate apply order, not readiness: workloads may still be starting after each command completes. PostgreSQL needs suitable persistent storage and database initialization. The frontend manifest sets `API_URL=http://api:5000/api`, pointing nginx at the API Service in the same namespace.
 
 ---
 

@@ -1,25 +1,64 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata: {name: taskflow-api, namespace: taskflow}
+metadata:
+  name: taskflow-api
+  namespace: taskflow
 spec:
   replicas: 3
-  selector: {matchLabels: {app: taskflow-api}}
+  selector:
+    matchLabels:
+      app: taskflow-api
   template:
-    metadata: {labels: {app: taskflow-api}}
+    metadata:
+      labels:
+        app: taskflow-api
     spec:
       serviceAccountName: taskflow-api
       containers:
-      - name: api
-        image: taskflow-api:v1
-        imagePullPolicy: IfNotPresent
-        ports: [{containerPort: 5000}]
-        envFrom: [{configMapRef: {name: taskflow-config}}, {secretRef: {name: taskflow-secret}}]
-        resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 512Mi}}
-        readinessProbe: {httpGet: {path: /ready, port: 5000}, initialDelaySeconds: 5, periodSeconds: 5}
-        livenessProbe: {httpGet: {path: /health, port: 5000}, initialDelaySeconds: 10, periodSeconds: 10}
-        securityContext: {allowPrivilegeEscalation: false, runAsNonRoot: true, capabilities: {drop: [ALL]}}
+        - name: api
+          image: taskflow-api:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: taskflow-config
+            - secretRef:
+                name: taskflow-secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
 ---
 apiVersion: v1
 kind: Service
-metadata: {name: api, namespace: taskflow}
-spec: {selector: {app: taskflow-api}, ports: [{port: 5000, targetPort: 5000}]}
+metadata:
+  name: api
+  namespace: taskflow
+spec:
+  selector:
+    app: taskflow-api
+  ports:
+    - port: 5000
+      targetPort: 5000
