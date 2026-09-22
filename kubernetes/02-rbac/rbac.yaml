@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: taskflow-api, namespace: taskflow}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: taskflow-readonly, namespace: taskflow}
+rules: [{apiGroups: [""], resources: [pods,pods/log,services], verbs: [get,list,watch]}]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: taskflow-readonly, namespace: taskflow}
+subjects: [{kind: ServiceAccount, name: taskflow-api, namespace: taskflow}]
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: taskflow-readonly}
