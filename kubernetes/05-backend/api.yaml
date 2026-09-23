@@ -16,7 +16,7 @@ spec:
       serviceAccountName: taskflow-api
       containers:
         - name: api
-          image: taskflow-api:v1
+          image: incriszz/taskflow-api:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000

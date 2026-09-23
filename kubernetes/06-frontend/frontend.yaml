@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: taskflow-frontend:v1
+          image: incriszz/taskflow-frontend:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
