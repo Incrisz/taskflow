@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres
-  namespace: taskflow
+  namespace: {{ .Release.Namespace }}
 spec:
   clusterIP: None
   selector:
@@ -15,7 +15,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
-  namespace: taskflow
+  namespace: {{ .Release.Namespace }}
 spec:
   serviceName: postgres
   replicas: 1
@@ -29,21 +29,21 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:17-alpine
+          image: {{ .Values.postgres.image | quote }}
           ports:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: taskflow
+              value: {{ .Values.config.databaseName | quote }}
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: taskflow-secret
+                  name: {{ required "Set existingSecret" .Values.existingSecret | quote }}
                   key: DB_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: taskflow-secret
+                  name: {{ required "Set existingSecret" .Values.existingSecret | quote }}
                   key: DB_PASSWORD
           volumeMounts:
             - name: postgres-data
@@ -55,6 +55,7 @@ spec:
         - name: postgres-init
           configMap:
             name: postgres-init
+      automountServiceAccountToken: false
   volumeClaimTemplates:
     - metadata:
         name: postgres-data
@@ -63,4 +64,4 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 2Gi
+            storage: {{ .Values.postgres.storage | quote }}

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: taskflow
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS tasks (id SERIAL PRIMARY KEY,title VARCHAR(255) NOT NULL,description TEXT,status VARCHAR(30) DEFAULT 'TODO',priority VARCHAR(20) DEFAULT 'MEDIUM',created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+    INSERT INTO tasks(title,description,status,priority) SELECT * FROM (VALUES ('Deploy TaskFlow API','Deploy backend application to Kubernetes','IN_PROGRESS','HIGH'),('Configure monitoring','Install Prometheus and Grafana','TODO','MEDIUM'),('Configure persistent storage','Create PVC for PostgreSQL','COMPLETED','HIGH')) AS v(title,description,status,priority) WHERE NOT EXISTS (SELECT 1 FROM tasks);

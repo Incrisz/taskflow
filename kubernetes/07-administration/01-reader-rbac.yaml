@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: taskflow-reader
+  namespace: taskflow
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: taskflow-reader
+  namespace: taskflow
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - pods
+      - pods/log
+      - services
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: taskflow-reader
+  namespace: taskflow
+subjects:
+  - kind: ServiceAccount
+    name: taskflow-reader
+    namespace: taskflow
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: taskflow-reader

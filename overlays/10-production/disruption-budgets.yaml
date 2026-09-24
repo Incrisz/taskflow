@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: taskflow-api
+  namespace: taskflow
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: taskflow-api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: taskflow-frontend
+  namespace: taskflow
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: taskflow-frontend

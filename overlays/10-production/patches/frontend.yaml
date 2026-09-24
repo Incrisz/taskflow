@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taskflow-frontend
+  namespace: taskflow
+spec:
+  template:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: frontend
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - envsubst '${API_URL}' < /etc/taskflow/default.conf.template > /tmp/default.conf && exec
+              nginx -c /etc/taskflow/nginx.conf -g 'daemon off;'
+          ports:
+            - containerPort: 80
+              $patch: delete
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx
+              mountPath: /etc/taskflow
+              readOnly: true
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: nginx
+          configMap:
+            name: frontend-nginx

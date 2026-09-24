@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: taskflow-api
-  namespace: taskflow
+  namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 3
+  replicas: {{ .Values.api.replicas }}
   selector:
     matchLabels:
       app: taskflow-api
@@ -16,15 +16,15 @@ spec:
       serviceAccountName: taskflow-api
       containers:
         - name: api
-          image: incriszz/taskflow-api:v1
-          imagePullPolicy: IfNotPresent
+          image: {{ .Values.api.image | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: 5000
           envFrom:
             - configMapRef:
                 name: taskflow-config
             - secretRef:
-                name: taskflow-secret
+                name: {{ required "Set existingSecret" .Values.existingSecret | quote }}
           resources:
             requests:
               cpu: 100m
@@ -52,12 +52,13 @@ spec:
             capabilities:
               drop:
                 - ALL
+      automountServiceAccountToken: false
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: api
-  namespace: taskflow
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     app: taskflow-api

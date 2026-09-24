@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backup-reader
+  namespace: taskflow
+  labels:
+    app: postgres-backup
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 70
+    runAsGroup: 70
+    fsGroup: 70
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: reader
+      image: postgres:17-alpine
+      command:
+        - /bin/sh
+        - -c
+      args:
+        - sleep 3600
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+      volumeMounts:
+        - name: backups
+          mountPath: /backups
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+  volumes:
+    - name: backups
+      persistentVolumeClaim:
+        claimName: postgres-backups
+    - name: tmp
+      emptyDir: {}

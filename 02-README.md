@@ -1779,3 +1779,5 @@ TaskFlow
 This prepares the application for:
 
 **Module 5 — ConfigMaps, Secrets, Persistent Configuration and Helm Charts.**
+
+Continue with [03-README.md](03-README.md) for Modules 5–8: Helm, administration, monitoring, logging, hardening and backups. Keep the application namespace if you plan to continue immediately.
