@@ -11,7 +11,7 @@ metadata:
 
 spec:
 
-  type: ClusterIP
+  type: NodePort
 
 
   selector:
@@ -23,3 +23,4 @@ spec:
 
   - port: 5000
     targetPort: 5000
+    nodePort: 30500
