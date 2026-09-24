@@ -68,7 +68,7 @@ taskflow
 Create namespace:
 
 ```bash
-kubectl create namespace taskflow
+kubectl apply -f 00-namespace.yaml
 ```
 
 View namespaces:
@@ -81,22 +81,36 @@ kubectl get namespaces
 
 # Deploy Application
 
-Apply all Kubernetes manifests:
+Run these commands from the project root on the server (the directory containing `00-namespace.yaml` and this README).
+
+Apply each manifest in order. You can copy and paste this entire block:
+
+```bash
+kubectl apply -f 00-namespace.yaml
+kubectl apply -f 01-backend-configmap.yaml
+kubectl apply -f 02-backend-secret.yaml
+kubectl apply -f 03-postgres-storage.yaml
+kubectl apply -f 03-postgres.yaml
+kubectl apply -f 04-postgres-service.yaml
+kubectl apply -f 05-redis.yaml
+kubectl apply -f 06-redis-service.yaml
+kubectl apply -f 07-backend.yaml
+kubectl apply -f 08-backend-service.yaml
+kubectl apply -f 09-frontend-config.yaml
+kubectl apply -f 10-frontend.yaml
+kubectl apply -f 11-frontend-service.yaml
+```
+
+Alternatively, apply all Kubernetes manifests in the current directory:
 
 ```bash
 kubectl apply -f .
 ```
 
-Apply a specific file:
+To reapply just the PostgreSQL deployment:
 
 ```bash
-kubectl apply -f filename.yaml
-```
-
-Example:
-
-```bash
-kubectl apply -f postgres.yaml
+kubectl apply -f 03-postgres.yaml
 ```
 
 ---
@@ -436,7 +450,7 @@ Disk Storage
 Create PostgreSQL storage:
 
 ```bash
-kubectl apply -f postgres-storage.yaml
+kubectl apply -f 03-postgres-storage.yaml
 ```
 
 ---
