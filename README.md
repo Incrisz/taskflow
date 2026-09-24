@@ -14,30 +14,14 @@ The application consists of:
 # Architecture
 
 ```
-                         User
-                          |
-                          |
-                  taskflow-frontend
-                    (Frontend Pod)
-                          |
-                          |
-                  taskflow-api Service
-                          |
-                          |
-                   taskflow-api Pod
-                    (Backend API)
-                    /          \
-                   /            \
-                  /              \
-          PostgreSQL Service     Redis Service
-                |                     |
-        PostgreSQL Pod          Redis Pod
-                |
-                |
-        PersistentVolumeClaim
-                |
-                |
-        Persistent Storage
+Browser
+  |-- Frontend: http://54.226.139.213:30400
+  |     NodePort -> taskflow-frontend Pod
+  |
+  +-- API: http://54.226.139.213:30500/api/...
+        NodePort -> taskflow-api Pod
+                      |-- PostgreSQL Service -> PostgreSQL Pod -> PVC
+                      +-- Redis Service -> Redis Pod
 ```
 
 ---
@@ -643,25 +627,33 @@ kubectl get events -n taskflow --sort-by=.metadata.creationTimestamp
 
 # Troubleshooting Guide
 
-## Frontend API Requests Return 404
+## Public Backend Access (NodePort)
 
-If `/api/status` returns `Cannot GET /status`, the frontend proxy is stripping the `/api` prefix required by the backend.
+The frontend is exposed on port `30400` and the backend on port `30500`.
+The browser should call `http://54.226.139.213:30500/api/status` and
+`http://54.226.139.213:30500/api/tasks` directly.
 
-`09-frontend-config.yaml` defines an Nginx proxy with `proxy_pass http://taskflow-api:5000;` (no trailing slash), which preserves the request path. `10-frontend.yaml` mounts this configuration into the frontend container.
+`08-backend-service.yaml` exposes the backend using NodePort `30500`.
+`09-frontend-config.yaml` sets `API_URL` to `http://54.226.139.213:30500`.
+`10-frontend.yaml` passes this setting to the frontend container without a custom Nginx configuration mount.
 
-After copying the updated files to the server, run from the project root:
+After copying these files to the server, run from the project root:
 
 ```bash
+kubectl apply -f 08-backend-service.yaml
 kubectl apply -f 09-frontend-config.yaml
 kubectl apply -f 10-frontend.yaml
 kubectl rollout restart deployment/taskflow-frontend -n taskflow
 kubectl rollout status deployment/taskflow-frontend -n taskflow
-kubectl exec deployment/taskflow-frontend -n taskflow -- nginx -t
-curl -i http://54.226.139.213:30400/api/status
-curl -i http://54.226.139.213:30400/api/tasks
+curl -i http://54.226.139.213:30500/api/status
+curl -i http://54.226.139.213:30500/api/tasks
 ```
 
-Both endpoints should return HTTP 200. Restart the frontend after future changes to this ConfigMap because the mounted file uses `subPath` and Nginx must reload its configuration.
+Allow inbound TCP port `30500` in the server's security group/firewall for the clients using the app. Keep port `30400` accessible for the frontend.
+
+**Frontend integration still needs verification:** a container environment variable only changes browser requests if the frontend image supports that setting. If browser requests still go to port `30400`, update the frontend source to use the public backend URL and rebuild its image. This repository contains deployment manifests, not the frontend source. Do not add `/api` twice when constructing request URLs.
+
+Requests between these two ports are cross-origin; the backend must allow the frontend origin `http://54.226.139.213:30400` through CORS. Update the public IP in the configuration if the server address changes.
 
 ---
 
