@@ -11,4 +11,4 @@ metadata:
 
 data:
 
-  API_URL: "http://taskflow-api:5000"
+  API_URL: "http://54.226.139.213:30500"
