@@ -14,14 +14,15 @@ The application consists of:
 # Architecture
 
 ```
-Browser
-  |-- Frontend: http://54.226.139.213:30400
-  |     NodePort -> taskflow-frontend Pod
-  |
-  +-- API: http://54.226.139.213:30500/api/...
-        NodePort -> taskflow-api Pod
-                      |-- PostgreSQL Service -> PostgreSQL Pod -> PVC
-                      +-- Redis Service -> Redis Pod
+Browser -> NodePort 30400 -> taskflow-frontend Pod
+                                  |
+                         Internal API requests
+                                  |
+                      taskflow-api ClusterIP:5000
+                                  |
+                           taskflow-api Pod
+                             |-- PostgreSQL Service -> PostgreSQL Pod -> PVC
+                             +-- Redis Service -> Redis Pod
 ```
 
 ---
@@ -627,33 +628,37 @@ kubectl get events -n taskflow --sort-by=.metadata.creationTimestamp
 
 # Troubleshooting Guide
 
-## Public Backend Access (NodePort)
+## Internal Backend Access (ClusterIP)
 
-The frontend is exposed on port `30400` and the backend on port `30500`.
-The browser should call `http://54.226.139.213:30500/api/status` and
-`http://54.226.139.213:30500/api/tasks` directly.
+The frontend is exposed on NodePort `30400`. The backend uses ClusterIP and is available inside the cluster at `http://taskflow-api:5000`.
 
-`08-backend-service.yaml` exposes the backend using NodePort `30500`.
-`09-frontend-config.yaml` sets `API_URL` to `http://54.226.139.213:30500`.
-`10-frontend.yaml` passes this setting to the frontend container without a custom Nginx configuration mount.
+`08-backend-service.yaml` defines the backend ClusterIP service.
+`09-frontend-config.yaml` sets `API_URL` to `http://taskflow-api:5000`.
 
-After copying these files to the server, run from the project root:
+After copying the updated files to the server, run from the project root:
 
 ```bash
 kubectl apply -f 08-backend-service.yaml
 kubectl apply -f 09-frontend-config.yaml
-kubectl apply -f 10-frontend.yaml
 kubectl rollout restart deployment/taskflow-frontend -n taskflow
 kubectl rollout status deployment/taskflow-frontend -n taskflow
-curl -i http://54.226.139.213:30500/api/status
-curl -i http://54.226.139.213:30500/api/tasks
+kubectl get svc taskflow-api -n taskflow
 ```
 
-Allow inbound TCP port `30500` in the server's security group/firewall for the clients using the app. Keep port `30400` accessible for the frontend.
+To test the backend directly, run this in a separate terminal on the server and leave it running:
 
-**Frontend integration still needs verification:** a container environment variable only changes browser requests if the frontend image supports that setting. If browser requests still go to port `30400`, update the frontend source to use the public backend URL and rebuild its image. This repository contains deployment manifests, not the frontend source. Do not add `/api` twice when constructing request URLs.
+```bash
+kubectl port-forward svc/taskflow-api 5000:5000 -n taskflow
+```
 
-Requests between these two ports are cross-origin; the backend must allow the frontend origin `http://54.226.139.213:30400` through CORS. Update the public IP in the configuration if the server address changes.
+Then run these commands in another terminal on the same server:
+
+```bash
+curl -i http://127.0.0.1:5000/api/status
+curl -i http://127.0.0.1:5000/api/tasks
+```
+
+**Frontend integration still needs verification:** `taskflow-api` resolves inside the cluster, not in the user's browser. The frontend container must proxy browser API requests to the backend. Setting `API_URL` alone does not verify that the image handles the proxy correctly. This repository contains deployment manifests, not the frontend source.
 
 ---
 
