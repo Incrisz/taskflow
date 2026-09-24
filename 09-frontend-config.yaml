@@ -1,0 +1,14 @@
+apiVersion: v1
+
+kind: ConfigMap
+
+metadata:
+
+  name: taskflow-frontend-config
+
+  namespace: taskflow
+
+
+data:
+
+  API_URL: "http://taskflow-api:5000"

@@ -1,5 +1,0 @@
-TaskFlow was installed into {{ .Release.Namespace }}. Use one release per namespace.
-
-kubectl -n {{ .Release.Namespace }} port-forward service/frontend 3000:80
-
-The existing Secret and PostgreSQL PVC are not deleted by helm uninstall.

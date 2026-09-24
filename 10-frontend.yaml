@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+
+  name: taskflow-frontend
+
+  namespace: taskflow
+
+
+spec:
+
+  replicas: 1
+
+
+  selector:
+
+    matchLabels:
+
+      app: taskflow-frontend
+
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: taskflow-frontend
+
+
+    spec:
+
+
+      containers:
+
+      - name: frontend
+
+        image: incriszz/taskflow-frontend:latest
+
+
+        ports:
+
+        - containerPort: 80
+
+
+        envFrom:
+
+        - configMapRef:
+
+            name: taskflow-frontend-config
