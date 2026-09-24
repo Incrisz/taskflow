@@ -37,7 +37,7 @@ spec:
 
       - name: frontend
 
-        image: incriszz/taskflow-frontend:latest
+        image: incriszz/taskflow-frontend:v1
 
 
         ports:

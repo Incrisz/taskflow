@@ -28,7 +28,7 @@ spec:
 
       - name: api
 
-        image: incriszz/taskflow-api:latest
+        image: incriszz/taskflow-api:v1
 
 
         ports:
