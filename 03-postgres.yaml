@@ -5,44 +5,66 @@ metadata:
   name: postgres
   namespace: taskflow
 
+
 spec:
 
-  containers:
-
-  - name: postgres
-
-    image: postgres:16
+  replicas: 1
 
 
-    ports:
+  selector:
 
-    - containerPort: 5432
-
-
-    env:
-
-    - name: POSTGRES_DB
-      value: taskflow
-
-    - name: POSTGRES_USER
-      value: taskflow
-
-    - name: POSTGRES_PASSWORD
-      value: taskflow123
+    matchLabels:
+      app: postgres
 
 
-    volumeMounts:
+  template:
 
-    - name: postgres-storage
+    metadata:
 
-      mountPath: /var/lib/postgresql/data
+      labels:
+        app: postgres
+
+
+    spec:
+
+      containers:
+
+      - name: postgres
+
+        image: postgres:16
+
+
+        ports:
+
+        - containerPort: 5432
+
+
+        env:
+
+        - name: POSTGRES_DB
+          value: taskflow
+
+
+        - name: POSTGRES_USER
+          value: taskflow
+
+
+        - name: POSTGRES_PASSWORD
+          value: taskflow123
+
+
+        volumeMounts:
+
+        - name: postgres-storage
+
+          mountPath: /var/lib/postgresql/data
 
 
 
-  volumes:
+      volumes:
 
-  - name: postgres-storage
+      - name: postgres-storage
 
-    persistentVolumeClaim:
+        persistentVolumeClaim:
 
-      claimName: postgres-pvc
+          claimName: postgres-pvc
