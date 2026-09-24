@@ -45,8 +45,23 @@ spec:
         - containerPort: 80
 
 
-        envFrom:
+        env:
+        - name: API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: taskflow-frontend-config
+              key: API_URL
 
-        - configMapRef:
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+          readOnly: true
 
-            name: taskflow-frontend-config
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: taskflow-frontend-config
+          items:
+          - key: default.conf
+            path: default.conf

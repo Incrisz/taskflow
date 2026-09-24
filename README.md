@@ -643,6 +643,28 @@ kubectl get events -n taskflow --sort-by=.metadata.creationTimestamp
 
 # Troubleshooting Guide
 
+## Frontend API Requests Return 404
+
+If `/api/status` returns `Cannot GET /status`, the frontend proxy is stripping the `/api` prefix required by the backend.
+
+`09-frontend-config.yaml` defines an Nginx proxy with `proxy_pass http://taskflow-api:5000;` (no trailing slash), which preserves the request path. `10-frontend.yaml` mounts this configuration into the frontend container.
+
+After copying the updated files to the server, run from the project root:
+
+```bash
+kubectl apply -f 09-frontend-config.yaml
+kubectl apply -f 10-frontend.yaml
+kubectl rollout restart deployment/taskflow-frontend -n taskflow
+kubectl rollout status deployment/taskflow-frontend -n taskflow
+kubectl exec deployment/taskflow-frontend -n taskflow -- nginx -t
+curl -i http://54.226.139.213:30400/api/status
+curl -i http://54.226.139.213:30400/api/tasks
+```
+
+Both endpoints should return HTTP 200. Restart the frontend after future changes to this ConfigMap because the mounted file uses `subPath` and Nginx must reload its configuration.
+
+---
+
 ## Pod is Pending
 
 Check:
