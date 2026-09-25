@@ -8,7 +8,7 @@ frontend:
 
     repository: ogdev1/oge-portfolio
 
-    tag: v1
+    tag: v2
 
 
   service:
