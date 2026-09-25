@@ -6,9 +6,9 @@ frontend:
 
   image:
 
-    repository: incriszz/taskflow-frontend
+    repository: ogdev1/oge-portfolio
 
-    tag: latest
+    tag: v1
 
 
   service:
