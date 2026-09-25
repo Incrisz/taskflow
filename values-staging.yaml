@@ -7,7 +7,7 @@
 
     repository: incriszz/taskflow-frontend
 
-    tag: latest
+    tag: v1
 
 
   service:

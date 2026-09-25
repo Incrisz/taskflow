@@ -17,3 +17,5 @@ helm list -n taskflow
 helm upgrade taskflow .
 
 helm uninstall taskflow -n taskflow
+
+helm install taskflow-prod . -n taskflow-prod -f values-staging.yaml
