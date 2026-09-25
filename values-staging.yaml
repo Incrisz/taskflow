@@ -1,13 +1,14 @@
+frontend:
 
   enabled: true
 
-  replicaCount: 3
+  replicaCount: 1
 
   image:
 
     repository: incriszz/taskflow-frontend
 
-    tag: v1
+    tag: latest
 
 
   service:
