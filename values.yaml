@@ -1,0 +1,20 @@
+frontend:
+
+  enabled: true
+
+  replicaCount: 1
+
+  image:
+
+    repository: incriszz/taskflow-frontend
+
+    tag: latest
+
+
+  service:
+
+    type: NodePort
+
+    port: 80
+
+    nodePort: 30080

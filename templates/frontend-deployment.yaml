@@ -1,17 +1,16 @@
-apiVersion: apps/v1
+{{- if .Values.frontend.enabled }}
 
+apiVersion: apps/v1
 kind: Deployment
 
 metadata:
 
   name: taskflow-frontend
 
-  namespace: taskflow
-
 
 spec:
 
-  replicas: 1
+  replicas: {{ .Values.frontend.replicaCount }}
 
 
   selector:
@@ -19,6 +18,7 @@ spec:
     matchLabels:
 
       app: taskflow-frontend
+
 
 
   template:
@@ -30,14 +30,14 @@ spec:
         app: taskflow-frontend
 
 
-    spec:
 
+    spec:
 
       containers:
 
       - name: frontend
 
-        image: incriszz/taskflow-frontend:v1
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
 
 
         ports:
@@ -45,6 +45,4 @@ spec:
         - containerPort: 80
 
 
-        envFrom:
-        - configMapRef:
-            name: taskflow-frontend-config
+{{- end }}
